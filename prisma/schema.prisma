@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      Role     @default(PEGAWAI)
+  createdAt DateTime @default(now()) @map("created_at")
+  pegawai   Pegawai?
+
+  @@map("users")
+}
+
+model Pegawai {
+  id        Int            @id @default(autoincrement())
+  userId    Int            @unique @map("user_id")
+  nama      String
+  email     String?
+  telepon   String?
+  createdAt DateTime       @default(now()) @map("created_at")
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    StatusClient[]
+
+  @@map("pegawai")
+}
+
+model Client {
+  id        Int            @id @default(autoincrement())
+  namaAnak  String         @map("nama_anak")
+  namaOrtu  String?        @map("nama_ortu")
+  telepon   String?
+  alamat    String?
+  createdAt DateTime       @default(now()) @map("created_at")
+  status    StatusClient[]
+
+  @@map("clients")
+}
+
+model StatusClient {
+  id         Int        @id @default(autoincrement())
+  clientId   Int        @map("client_id")
+  pegawaiId  Int        @map("pegawai_id")
+  status     StatusEnum @default(PENDING)
+  keterangan String?
+  tanggal    DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  client     Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  pegawai    Pegawai    @relation(fields: [pegawaiId], references: [id], onDelete: Cascade)
+
+  @@map("status_client")
+}
+
+enum Role {
+  ADMIN
+  KETUA
+  PEGAWAI
+}
+
+enum StatusEnum {
+  PENDING
+  DIVERIFIKASI
+  DIPROSES
+  SELESAI
+  DITOLAK
+}
