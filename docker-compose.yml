@@ -1,0 +1,28 @@
+services:
+  # 1. Layanan Database PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: e_monitor_anak
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Layanan Backend Express Anda
+  backend:
+    build: .
+    container_name: express_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      # Perhatikan: alamat host-nya langsung memakai nama layanan di atas yaitu 'db'
+      DATABASE_URL="postgresql://postgres:123@localhost:5432/e_monitor_anak"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
